@@ -11,7 +11,6 @@ import com.microsoft.playwright.Playwright;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class Playwright_Test {
@@ -24,8 +23,7 @@ public class Playwright_Test {
     public void initialized() {
         playwright = Playwright.create();
         browser = playwright.chromium()
-                .launch(new LaunchOptions().setHeadless(false)
-                        .setArgs(Arrays.asList("--start-maximized")));
+                .launch(new LaunchOptions().setHeadless(false));
         context = browser.newContext();
         pageAuto = context.newPage();
     }
@@ -111,8 +109,6 @@ public class Playwright_Test {
 
         pageAuto.fill("#name", "Rifky Pahlevy");
 
-       
-
         // pageAuto.onDialog(dialog2 -> {
         // System.out.println("Dialog Type " + dialog2.type());
 
@@ -133,9 +129,16 @@ public class Playwright_Test {
         // pageAuto.selectOption("#dropdown-class-example", "option2");
         // pageAuto.waitForTimeout(1000);
 
-         pageAuto.click("#confirmbtn");
+        pageAuto.click("#confirmbtn");
 
         pageAuto.waitForTimeout(5000);
+
+    }
+
+    @Test
+    public void sendMessage() throws InterruptedException {
+        pageAuto.navigate("https://web.whatsapp.com");
+        Thread.sleep(2000);
 
     }
 

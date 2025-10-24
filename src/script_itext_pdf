@@ -1,0 +1,234 @@
+package documents
+
+
+
+import java.time.*
+import java.time.format.DateTimeFormatter
+
+import com.itextpdf.text.*
+import com.itextpdf.text.pdf.*
+import com.kms.katalon.core.configuration.RunConfiguration
+
+
+
+
+
+import internal.GlobalVariable
+
+public class DocumentCreate {
+	Document document
+	String outputPath
+	PdfWriter writer
+
+	static class HeaderFooter extends PdfPageEventHelper {
+		@Override
+		public void onEndPage(PdfWriter writer, Document document) {
+
+			def now = LocalDateTime.now()
+			def formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+			def formattedDateTime = now.format(formatter)
+
+			try {
+				PdfPTable headerTable = new PdfPTable(3)
+				// 2 columns: image + text
+				headerTable.setTotalWidth(527)
+				headerTable.setWidths([1, 3, 2] as int[]) // Adjust column width ratio
+				headerTable.setLockedWidth(true)
+				headerTable.getDefaultCell().setBorder(Rectangle.BOTTOM)
+				headerTable.getDefaultCell().setFixedHeight(50)
+
+				float cellHeight = 50f
+
+
+
+				// Load the image
+				Image logo = Image.getInstance(RunConfiguration.getProjectDir() + "/Screenshots/Logo/XLSMART-LOGO.png") // <-- your image file
+				logo.scaleAbsolute(100f, 40f) // Resize image
+				PdfPCell imageCell = new PdfPCell(logo, false)
+				imageCell.setBorder(Rectangle.BOTTOM)
+				imageCell.setVerticalAlignment(Element.ALIGN_MIDDLE)
+				imageCell.setPadding(5)
+
+				// Create text cell
+				PdfPCell textCell = new PdfPCell(new Phrase("APIGATE & AXONECT", new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD)))
+				textCell.setBorder(Rectangle.BOTTOM)
+				textCell.setVerticalAlignment(Element.ALIGN_MIDDLE)
+				textCell.setHorizontalAlignment(Element.ALIGN_CENTER)
+
+				PdfPCell textCellDate = new PdfPCell(new Phrase(formattedDateTime, new Font(Font.FontFamily.HELVETICA, 10, Font.ITALIC)))
+				textCellDate.setFixedHeight(cellHeight)
+				textCellDate.setBorder(Rectangle.BOTTOM)
+				textCellDate.setVerticalAlignment(Element.ALIGN_MIDDLE)
+				textCellDate.setHorizontalAlignment(Element.ALIGN_RIGHT)
+				textCellDate.setPaddingRight(10)
+
+				// Add cells to header
+				headerTable.addCell(imageCell)
+				headerTable.addCell(textCell)
+				headerTable.addCell(textCellDate)
+
+				// Draw header on top-left of the page
+				headerTable.writeSelectedRows(0, -1, 36, 803, writer.getDirectContent())
+			} catch (DocumentException e) {
+				throw new ExceptionConverter(e)
+			}
+		}
+	}
+
+	def coverFile () {
+		Font titleFont = new Font(Font.FontFamily.HELVETICA, 20, Font.BOLD, BaseColor.BLUE)
+		Font dateFont  = new Font(Font.FontFamily.HELVETICA, 16, Font.NORMAL, BaseColor.BLACK)
+		Font linkFont  = new Font(Font.FontFamily.HELVETICA, 16, Font.ITALIC, BaseColor.BLUE)
+		// Add Logo
+		Image logo = Image.getInstance(RunConfiguration.getProjectDir() + "/Screenshots/Logo/XLSMART-LOGO.png")  // ganti dengan path logo
+		logo.scaleToFit(200, 200)
+		logo.setAlignment(Element.ALIGN_LEFT)
+		document.add(logo)
+
+		// Spacer
+		document.add(new Paragraph("\n"))
+
+		// Title
+		Paragraph title = new Paragraph("APIGATE & AXONECT Configuration", titleFont)
+		title.alignment = Element.ALIGN_LEFT
+		document.add(title)
+
+
+
+		def now = LocalDateTime.now()
+		def formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ENGLISH)
+		def formattedDateTime = now.format(formatter)
+		Paragraph date = new Paragraph("Date: " + formattedDateTime, dateFont)
+		date.alignment = Element.ALIGN_LEFT
+		document.add(new Paragraph("\n"))
+		document.add(date)
+
+		for(int i=0;i<15;i++){
+			document.add(new Paragraph("\n"))
+		}
+
+		Anchor author = new Anchor("API & Microservices", linkFont)
+		Paragraph linkPara = new Paragraph()
+		linkPara.add(author)
+		linkPara.alignment = Element.ALIGN_CENTER
+		document.add(linkPara)
+		document.newPage()
+	}
+
+	def instanceDocument () {
+		def now = LocalDateTime.now()
+		def formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss")
+		def formattedDateTime = now.format(formatter)
+
+		document = new Document(PageSize.A4, 36, 36, 100, 36)
+		// Define the output file path
+		outputPath = RunConfiguration.getProjectDir() + "/Reports/"+RunConfiguration.getExecutionSourceName()+"-"+formattedDateTime+".pdf"
+		writer = PdfWriter.getInstance(document, new FileOutputStream(outputPath))
+
+
+
+
+
+
+		// Open the document
+		document.open()
+
+		coverFile()
+
+		// Set page event to add header
+		//		writer.setPageEvent(new HeaderFooter())
+	}
+
+
+	def addTitleContent (String title ) {
+
+		Font titleFontContent = new Font(Font.FontFamily.HELVETICA, 16, Font.BOLD, BaseColor.BLUE)
+		Paragraph titleContent = new Paragraph(title, titleFontContent)
+		titleContent.alignment = Element.ALIGN_CENTER
+		document.add(titleContent)
+		document.add(new Paragraph("\n"))
+	}
+
+	def addDocumentContent(String title, String desc, String pathImage) {
+
+
+		Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, Font.UNDERLINE)
+		Font descFont = new Font(Font.FontFamily.HELVETICA, 14, Font.ITALIC)
+
+		try {
+
+
+
+			// Add a paragraph (text content)
+			document.add(new Paragraph(title, titleFont))
+
+
+			File imgFile = new File(pathImage)
+			if (imgFile.exists()) {
+				Image img = Image.getInstance(pathImage)
+				img.scaleToFit(400, 800)  // Resize to fit nicely
+				document.add(img)
+				Thread.sleep(1000)
+				imgFile.delete()
+			} else {
+				document.add(new Paragraph(pathImage))
+			}
+			document.add(new Paragraph("\n"))
+			document.add(new Paragraph(desc, descFont))
+		} catch (Exception e) {
+			e.printStackTrace()
+		}
+	}
+
+	def closeDocument () {
+		// Close the document
+		document.close()
+		println("PDF generated successfully at: " + outputPath)
+	}
+
+	def addNewPage() {
+		// ➕ Add a new page
+		document.newPage()
+	}
+
+	def createTable (def data, def headers) {
+		// Judul (merge 4 kolom)
+		//		def titleTable = new PdfPTable(4)
+		//		def titleCell = new PdfPCell(new Phrase(title,
+		//		        FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, BaseColor.BLACK)))
+		//		titleCell.colspan = 4
+		//		titleCell.horizontalAlignment = Element.ALIGN_CENTER
+		//		titleCell.padding = 10
+		//		titleTable.addCell(titleCell)
+
+		//		document.add(titleTable)
+
+		// Tabel isi
+		def table = new PdfPTable(4)
+		table.setWidthPercentage(100)
+		table.setWidths([2, 6, 4, 4] as float[])
+
+		// Header
+
+		headers.each { h ->
+			def cell = new PdfPCell(new Phrase(h,
+					FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, BaseColor.WHITE)))
+			cell.backgroundColor = BaseColor.DARK_GRAY
+			cell.horizontalAlignment = Element.ALIGN_CENTER
+			table.addCell(cell)
+		}
+
+
+
+
+		data.each { row ->
+			row.each { col ->
+				def cell = new PdfPCell(new Phrase(col, FontFactory.getFont(FontFactory.HELVETICA, 9)))
+				cell.horizontalAlignment = Element.ALIGN_CENTER
+				table.addCell(cell)
+			}
+		}
+
+		document.add(table)
+	}
+}

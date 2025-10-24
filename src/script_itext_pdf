@@ -42,7 +42,7 @@ public class DocumentCreate {
 
 
 				// Load the image
-				Image logo = Image.getInstance(RunConfiguration.getProjectDir() + "/Screenshots/Logo/XLSMART-LOGO.png") // <-- your image file
+				Image logo = Image.getInstance(RunConfiguration.getProjectDir() + "/Screenshots/Logo/ddd-LOGO.png") // <-- your image file
 				logo.scaleAbsolute(100f, 40f) // Resize image
 				PdfPCell imageCell = new PdfPCell(logo, false)
 				imageCell.setBorder(Rectangle.BOTTOM)
@@ -50,7 +50,7 @@ public class DocumentCreate {
 				imageCell.setPadding(5)
 
 				// Create text cell
-				PdfPCell textCell = new PdfPCell(new Phrase("APIGATE & AXONECT", new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD)))
+				PdfPCell textCell = new PdfPCell(new Phrase("KIKI", new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD)))
 				textCell.setBorder(Rectangle.BOTTOM)
 				textCell.setVerticalAlignment(Element.ALIGN_MIDDLE)
 				textCell.setHorizontalAlignment(Element.ALIGN_CENTER)
@@ -80,7 +80,7 @@ public class DocumentCreate {
 		Font dateFont  = new Font(Font.FontFamily.HELVETICA, 16, Font.NORMAL, BaseColor.BLACK)
 		Font linkFont  = new Font(Font.FontFamily.HELVETICA, 16, Font.ITALIC, BaseColor.BLUE)
 		// Add Logo
-		Image logo = Image.getInstance(RunConfiguration.getProjectDir() + "/Screenshots/Logo/XLSMART-LOGO.png")  // ganti dengan path logo
+		Image logo = Image.getInstance(RunConfiguration.getProjectDir() + "/Screenshots/Logo/xxx-LOGO.png")  // ganti dengan path logo
 		logo.scaleToFit(200, 200)
 		logo.setAlignment(Element.ALIGN_LEFT)
 		document.add(logo)
@@ -89,7 +89,7 @@ public class DocumentCreate {
 		document.add(new Paragraph("\n"))
 
 		// Title
-		Paragraph title = new Paragraph("APIGATE & AXONECT Configuration", titleFont)
+		Paragraph title = new Paragraph("KIKI Configuration", titleFont)
 		title.alignment = Element.ALIGN_LEFT
 		document.add(title)
 
